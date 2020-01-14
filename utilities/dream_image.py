@@ -1,18 +1,15 @@
 import tensorflow as tf
-from images import show_image, vgg19_process_image, vgg19_deprocess_image
+from images import (
+    load_image,
+    show_image,
+    vgg19_process_image,
+    vgg19_deprocess_image
+)
 
 class DreamImage:
     def __init__(self, image_path, width, height, normalizer = 'min-max'):
         # Load the image from disk
-        self.img = tf.io.read_file(image_path)
-        if image_path.endswith('.png'):
-            self.img = tf.image.decode_png(self.img, channels = 3)
-        elif image_path.endswith('.jpg'):
-            self.img = tf.image.decode_jpg(self.img, channels = 3)
-        else:
-            raise TypeError(f'File format for {path} not supported or detected')
-
-        self.img = tf.cast(self.img, tf.float32)
+        self.img = load_image(image_path)
 
         # Set the target width and height
         self.width  = width

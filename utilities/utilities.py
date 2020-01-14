@@ -14,7 +14,12 @@ from sklearn.metrics import (
 
 from dream_image    import DreamImage
 from deep_dream     import DeepDream
-from images         import show_image
+from images         import (
+    show_image,
+    load_image,
+    vgg19_process_image,
+    vgg19_deprocess_image
+)
 
 ################################################################################
 #

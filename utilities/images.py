@@ -22,3 +22,17 @@ def vgg19_deprocess_image(image):
     image[:, :, 2] += 123.68
     out = np.clip(image[:, :, ::-1], 0, 255).astype('uint8')
     return tf.convert_to_tensor(out)
+
+def load_image(image_path, cast = tf.float32):
+    img = tf.io.read_file(image_path)
+    if image_path.endswith('.png'):
+        img = tf.image.decode_png(img, channels = 3)
+    elif image_path.endswith('.jpg'):
+        img = tf.image.decode_jpeg(img, channels = 3)
+    else:
+        raise TypeError(f'File format for {path} not supported or detected')
+
+    if cast is not None:
+        img = tf.cast(img, cast)
+
+    return img
