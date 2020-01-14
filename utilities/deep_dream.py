@@ -3,8 +3,10 @@ from progress_bar import ProgressBar
 
 class DeepDream(tf.Module):
 
-    def __init__(self, model):
-        self.model = model
+    def __init__(self, model, artist_vector):
+        self.model         = model
+        self.artist_vector = tf.convert_to_tensor(artist_vector)
+        self.artist_vector = tf.cast(self.artist_vector, tf.float32)
 
     @tf.function(
         input_signature=(
@@ -19,6 +21,7 @@ class DeepDream(tf.Module):
                 tape.watch(img)
                 activations = self.model(img)
                 loss        = tf.reduce_sum(tf.math.square(activations))
+                # loss        = tf.tensordot(activations, self.artist_vector, axes = [1, 0])
 
             # Calculate the gradient of the loss with respect to the pixels of the input image.
             gradients = tape.gradient(loss, img)

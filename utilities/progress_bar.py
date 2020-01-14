@@ -29,10 +29,10 @@ class ProgressBar:
         else:
             time_elapsed    = (datetime.now() - self.start_time).seconds
             eta             = int((1-percent_progress) * time_elapsed / percent_progress)
+            eta             = f' ETA: {eta}s'
 
         out_str = f'\r[{bar}] {iterations}/{self.total_iterations}'
-        if eta:
-            out_str += f' ETA: {eta}s'
+        out_str += eta
 
         # Be sure to clear any leftover text
         out_str += ' '*10
