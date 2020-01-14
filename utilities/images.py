@@ -15,12 +15,16 @@ def show_image(image):
 def vgg19_process_image(image):
     return tf.keras.applications.vgg19.preprocess_input(image)
 
-def vgg19_deprocess_image(image):
-    image = image.numpy()
+def vgg19_deprocess_image(image, clip_and_cast = True):
+    if not isinstance(image, np.ndarray):
+        image = image.numpy()
     image[:, :, 0] += 103.939
     image[:, :, 1] += 116.779
     image[:, :, 2] += 123.68
-    out = np.clip(image[:, :, ::-1], 0, 255).astype('uint8')
+    if clip_and_cast:
+        out = np.clip(image[:, :, ::-1], 0, 255).astype('uint8')
+    else:
+        out = image
     return tf.convert_to_tensor(out)
 
 def load_image(image_path, cast = tf.float32):
