@@ -20,6 +20,7 @@ from images         import (
     vgg19_process_image,
     vgg19_deprocess_image
 )
+from progress_bar import ProgressBar
 
 ################################################################################
 #
