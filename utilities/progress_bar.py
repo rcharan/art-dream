@@ -15,7 +15,8 @@ class ProgressBar:
 
         # Create the bar
         progress_ticks   = int(percent_progress * self.bar_width)
-        bar = '=' * progress_ticks + '-' * (self.bar_width - progress_ticks)
+        bar = '=' * progress_ticks + '>' + \
+              '-' * (self.bar_width - progress_ticks - 1)
 
         if iterations == self.total_iterations:
             if self.start_time is None:
