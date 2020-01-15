@@ -277,3 +277,12 @@ class FeaturePlot:
 # big = skimage.transform.pyramids.pyramid_expand(dream_img.numpy(), multichannel=True)
 # big = tf.convert_to_tensor(big)
 # show_image(postprocess_image(big))
+
+def _get_class_names():
+    df = pd.read_excel('../dataset/artist-breakdown-annotated.xlsx')
+    df = df[df.fillna(0).keep.astype(bool)]
+    class_names = df.artist.unique()
+    class_names.sort()
+    return class_names
+
+class_names = _get_class_names()
