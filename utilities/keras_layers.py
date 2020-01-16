@@ -13,8 +13,9 @@ def gram_matrix(activations):
 # Source layers (with no/fake inputs)
 class Source(Layer):
 
-    def __init__(self, output_dim, **kwargs):
-        self.output_dim = output_dim
+    def __init__(self, output_dim, kernel_constraint = None, **kwargs):
+        self.output_dim        = output_dim
+        self.kernel_constraint = kernel_constraint
         super().__init__(**kwargs)
 
     def build(self, input_shapes):
@@ -22,7 +23,10 @@ class Source(Layer):
         super().build(input_shapes)
 
     def call(self, inputs):
-        return self.kernel
+        if self.kernel_constraint is not None:
+            return self.kernel_constraint(self.kernel)
+        else:
+            return self.kernel
 
     def compute_output_shape(self):
         return self.output_dim
