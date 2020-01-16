@@ -1,6 +1,8 @@
 import tensorflow as tf
 from tensorflow.keras.layers import Layer
 
+from images import vgg19_deprocess_image
+
 # Gram Matrix Layers
 def gram_matrix(activations):
     result        = tf.linalg.einsum('aijb,aijc->abc', activations, activations)
