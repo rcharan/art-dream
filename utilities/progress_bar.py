@@ -30,7 +30,7 @@ class ProgressBar:
         else:
             time_elapsed    = (datetime.now() - self.start_time).seconds
             eta             = int((1-percent_progress) * time_elapsed / percent_progress)
-            eta             = f' ETA: {eta}s'
+            eta             = f' ETA: {format_time(eta)}s'
 
         out_str = f'\r[{bar}] {iterations}/{self.total_iterations}'
         out_str += eta
@@ -42,3 +42,23 @@ class ProgressBar:
             print(out_str)
         else:
             print(out_str, end = '')
+
+def format_time(seconds):
+    out_str = ''
+    if seconds >= 3600:
+        hours = seconds // 3600
+        out_str += f'{hours}:'
+        seconds -= hours * 3600
+    else:
+        hours = 0
+
+    if seconds >= 60:
+        minutes = seconds // 60
+        out_str += f'{minutes}:'
+        seconds -= minutes * 60
+    elif hours != 0:
+        out_str += '00:'
+
+    out_str += str(int(seconds))
+
+    return out_str
