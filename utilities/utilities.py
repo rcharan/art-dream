@@ -18,7 +18,9 @@ from images         import (
     show_image,
     load_image,
     vgg19_process_image,
-    vgg19_deprocess_image
+    vgg19_deprocess_image,
+    inceptionV3_process_image,
+    inceptionV3_deprocess_image,
 )
 from progress_bar import ProgressBar
 from keras_layers import (

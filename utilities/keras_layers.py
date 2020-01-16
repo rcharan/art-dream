@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras.layers import Layer
 
-from images import vgg19_deprocess_image
+from images import vgg19_deprocess_image, inceptionV3_deprocess_image
 
 # Gram Matrix Layers
 def gram_matrix(activations):
@@ -38,10 +38,15 @@ class Source(Layer):
 def precomputed_loss(dummy, loss):
     return loss
 
-def get_image_from_model(model, layer_name = 'image'):
+def get_image_from_model(model, layer_name = 'image', format_ = 'vgg19'):
     out_img = model.get_layer(layer_name).get_weights()[0]
-    out_img = tf.squeeze(vgg19_deprocess_image(out_img, clip_and_cast = False))
+    if format_ == 'vgg19':
+        out_img = vgg19_deprocess_image(out_img, clip_and_cast = False)
+    elif format_ == 'inceptionV3':
+        out_img = inceptionV3_deprocess_image(out_img)
+    out_img = tf.squeeze(out_img)
     out_img = out_img - tf.reduce_min(out_img)
-    out_img = out_img/tf.reduce_max(out_img) * 256
+    out_img = out_img / tf.reduce_max(out_img)
+    out_img = out_img * 256
     out_img = tf.cast(out_img, tf.uint8)
     return out_img

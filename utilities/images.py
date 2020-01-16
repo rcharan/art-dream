@@ -27,6 +27,14 @@ def vgg19_deprocess_image(image, clip_and_cast = True):
         out = image
     return tf.convert_to_tensor(out)
 
+def inceptionV3_process_image(image):
+    return tf.keras.applications.inception_v3.preprocess_input(image)
+
+def inceptionV3_deprocess_image(img):
+    img = 255*(img + 1.0)/2.0
+    return tf.cast(img, tf.uint8)
+
+
 def load_image(image_path, cast = tf.float32):
     img = tf.io.read_file(image_path)
     if image_path.endswith('.png'):
