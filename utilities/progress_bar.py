@@ -24,7 +24,7 @@ class ProgressBar:
             total_time = (datetime.now() - self.start_time).seconds
             time_per_iteration = total_time / iterations
             eta = f' {time_per_iteration:.2}s per loop'
-        elif self.start_time is None:
+        elif self.start_time is None or iterations == 0:
             self.start_time = datetime.now()
             eta             = ''
         else:
