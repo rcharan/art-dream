@@ -21,7 +21,12 @@ from images         import (
     vgg19_deprocess_image
 )
 from progress_bar import ProgressBar
-from keras_layers import gram_matrix, Source
+from keras_layers import (
+    gram_matrix,
+    Source,
+    precomputed_loss,
+    get_image_from_model
+)
 
 ################################################################################
 #

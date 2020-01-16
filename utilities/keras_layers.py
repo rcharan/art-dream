@@ -28,3 +28,14 @@ class Source(Layer):
     def get_params(self):
         base_config = super().get_config()
         return {**base_config, 'output_dim' : self.output_dim}
+
+def precomputed_loss(dummy, loss):
+    return loss
+
+def get_image_from_model(model, layer_name = 'image'):
+    out_img = model.get_layer(layer_name).get_weights()[0]
+    out_img = tf.squeeze(vgg19_deprocess_image(out_img, clip_and_cast = False))
+    out_img = out_img - tf.reduce_min(out_img)
+    out_img = out_img/tf.reduce_max(out_img) * 256
+    out_img = tf.cast(out_img, tf.uint8)
+    return out_img
