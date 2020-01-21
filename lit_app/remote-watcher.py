@@ -78,7 +78,7 @@ class Handler(FileSystemEventHandler):
             print(f'Detected file {file_name}')
             if file_name[-3:] not in ['jpg', 'png']:
                 print(f'''File doesn't appear to be a jpeg or png, ignoring''')
-                
+
             print('Waiting for the file to finish transmission')
             time.sleep(3)
 

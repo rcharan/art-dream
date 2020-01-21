@@ -11,6 +11,8 @@ _local_dir             = '/Users/rcharan/Dropbox/Flatiron/final-project/art-drea
 local_dreamt_dir       = _local_dir + 'dreamt-images/'
 local_dream_base_dir   = _local_dir + 'dream-base-images/'
 
+local_ingest_dir       = _local_dir + 'dream-base-images/'
+
 poll_results_loc       = f'{_local_dir}lit_app/remote_dreams.txt'
 # Command to monitor the remote file system
 def _remote_monitor_command():
@@ -26,15 +28,15 @@ def _remote_fetch_command(file_name):
     return scp_command + remote_dreamt_dir + file_name + f' {local_dreamt_dir}' + ' --compress'
 
 # Command to put a file onto the remote file system
-def _remote_put_command(file_name):
-    scp_command = f'gcloud compute scp {local_dream_base_dir}{file_name}'
+def _remote_put_command(file_path):
+    scp_command = f'gcloud compute scp {file_path}'
     return scp_command + f' jupyter@flatiron:{remote_dream_base_dir}' + ' --compress'
 
 
 
 # Functions to post and fetch files
-def post_file(file_name):
-    return_code = os.system(_remote_put_command(file_name))
+def post_file(file_path):
+    return_code = os.system(_remote_put_command(file_path))
     if return_code != 0:
         print(f'WARNING: failed to post file {file_name} with return code {return_code}')
 
@@ -92,7 +94,37 @@ def wait_for_file(file_name, poll_freq = 2, initial_wait = 5, timeout = 20):
         time_elapsed = (datetime.now() - start).seconds
         return True, time_elapsed
 
-if __name__ == '__main__':
-    # print(_remote_monitor_command())
-    # response_code = os.system(_remote_monitor_command())
-    wait_for_file('marco3.jpg', initial_wait = 0)
+
+class Handler(FileSystemEventHandler):
+
+    @staticmethod
+    def on_any_event(event):
+        if event.is_directory:
+            return None
+
+        elif event.event_type == 'created':
+            # Take any action here when a file is first created.
+            file_name = event.src_path.split('/')[-1]
+
+            print(event.src_path)
+            print(f'Detected file {file_name}')
+            if file_name[-3:] not in ['jpg', 'png']:
+                print(f'''File doesn't appear to be a jpeg or png, ignoring''')
+
+            print('Waiting for the file to finish loading locally')
+            time.sleep(1)
+
+            post_file(event.src_path)
+            wait_for_file(file_name, poll_freq = 2, initial_wait = 3, timeout = 20)
+
+        elif event.event_type == 'modified':
+            # Taken any action here when a file is modified.
+            print(f'Noticed file {event.src_path} was modified, ignoring')
+
+watcher = Watcher(local_ingest_dir, Handler(), 'dream-base-watcher')
+watcher.run()
+
+
+
+# if __name__ == '__main__':
+    # wait_for_file('marco3.jpg', initial_wait = 0)
