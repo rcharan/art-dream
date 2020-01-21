@@ -1,5 +1,6 @@
 from watchdog.events import FileSystemEventHandler
 from file_watcher import Watcher
+import time
 
 import sys
 sys.path.append('../utilities/')
@@ -77,11 +78,21 @@ class Handler(FileSystemEventHandler):
             print(f'Detected file {file_name}')
             if file_name[-3:] not in ['jpg', 'png']:
                 print(f'''File doesn't appear to be a jpeg or png, ignoring''')
+                
+            print('Waiting for the file to finish transmission')
+            time.sleep(3)
 
-            Timer.start()
-            print(f'Loading the file')
-            image, nat_size = load_lit_image(event.src_path, width, height)
-            Timer.end()
+            try:
+                Timer.start()
+                print(f'Loading the file')
+                image, nat_size = load_lit_image(event.src_path, width, height)
+                Timer.end()
+            except:
+                print(f'Error loading the file; will wait and try again')
+                time.sleep(5)
+                image, nat_size = load_lit_image(event.src_path, width, height)
+                Timer.end()
+
 
             print(f'Dreaming')
             image = dream(model, image, *nat_size)
