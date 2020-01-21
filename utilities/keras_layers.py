@@ -31,8 +31,8 @@ class Source(Layer):
     def compute_output_shape(self):
         return self.output_dim
 
-    def get_params(self):
-        base_config = super().get_config()
+    def get_config(self):
+        base_config = super(Source, self).get_config()
         return {**base_config, 'output_dim' : self.output_dim}
 
 def precomputed_loss(dummy, loss):
@@ -50,3 +50,6 @@ def get_image_from_model(model, layer_name = 'image', format_ = 'vgg19'):
     out_img = out_img * 256
     out_img = tf.cast(out_img, tf.uint8)
     return out_img
+
+dummy       = tf.constant(0, shape = (1,), dtype = tf.float32)
+dummy_input = tf.data.Dataset.from_tensors((dummy, dummy))

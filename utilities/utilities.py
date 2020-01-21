@@ -27,7 +27,8 @@ from keras_layers import (
     gram_matrix,
     Source,
     precomputed_loss,
-    get_image_from_model
+    get_image_from_model,
+    dummy, dummy_input
 )
 
 ################################################################################
