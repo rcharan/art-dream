@@ -15,8 +15,13 @@ class ProgressBar:
 
         # Create the bar
         progress_ticks   = int(percent_progress * self.bar_width)
-        bar = '=' * progress_ticks + '>' + \
-              '-' * (self.bar_width - progress_ticks - 1)
+        bar = '=' * progress_ticks
+        bar_end = '-' * (self.bar_width - progress_ticks - 1)
+        if iterations == self.total_iterations:
+            bar += bar_end
+        else:
+            bar += '>' + bar_end[1:]
+              
 
         if iterations == self.total_iterations:
             if self.start_time is None:
@@ -30,7 +35,7 @@ class ProgressBar:
         else:
             time_elapsed    = (datetime.now() - self.start_time).seconds
             eta             = int((1-percent_progress) * time_elapsed / percent_progress)
-            eta             = f' ETA: {format_time(eta)}s'
+            eta             = f' ETA: {format_time(eta)}'
 
         out_str = f'\r[{bar}] {iterations}/{self.total_iterations}'
         out_str += eta
@@ -45,20 +50,21 @@ class ProgressBar:
 
 def format_time(seconds):
     out_str = ''
-    if seconds >= 3600:
-        hours = seconds // 3600
+    hours = seconds // 3600
+    if hours > 0:
         out_str += f'{hours}:'
         seconds -= hours * 3600
-    else:
-        hours = 0
 
-    if seconds >= 60:
-        minutes = seconds // 60
+    minutes = seconds // 60
+    if hours != 0:
+        out_str += f'{minutes:02d}:'
+    elif minutes > 0:
         out_str += f'{minutes}:'
-        seconds -= minutes * 60
-    elif hours != 0:
-        out_str += '00:'
+    seconds -= minutes * 60
 
-    out_str += str(int(seconds))
+    if minutes != 0 or hours != 0:
+        out_str += f'{int(seconds):02d}'
+    else:
+        out_str += f'{int(seconds)}s'
 
     return out_str
