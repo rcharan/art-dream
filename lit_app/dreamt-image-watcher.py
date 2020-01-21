@@ -7,23 +7,23 @@ remote_dreamt_dir      = '~/art-dream/dreamt-images/'
 remote_dream_base_dir  = '~/art-dream/dream-base-images/'
 
 # Local directories
-_local_dir             = '~/Dropbox/Flatiron/final-project/art-dream/'
+_local_dir             = '/Users/rcharan/Dropbox/Flatiron/final-project/art-dream/'
 local_dreamt_dir       = _local_dir + 'dreamt-images/'
 local_dream_base_dir   = _local_dir + 'dream-base-images/'
 
-poll_results_loc       = f'{_local_dir}/lit_app/remote_dreams.txt'
+poll_results_loc       = f'{_local_dir}lit_app/remote_dreams.txt'
 # Command to monitor the remote file system
 def _remote_monitor_command():
     ssh_command     = 'gcloud compute ssh jupyter@flatiron'
-    monitor_command = f"--command 'ls {remote_dreamt_dir}'"
-    cat_command     = f'> {poll_results_loc}'
+    monitor_command = f" --command 'ls {remote_dreamt_dir}'"
+    cat_command     = f' > {poll_results_loc}'
 
     return ssh_command + monitor_command + cat_command
 
 # Command to fetch a file from the remote file system
 def _remote_fetch_command(file_name):
     scp_command = f'gcloud compute scp jupyter@flatiron:'
-    return scp_command + remote_dreamt_dir + f' {local_dreamt_dir}' + ' --compress'
+    return scp_command + remote_dreamt_dir + file_name + f' {local_dreamt_dir}' + ' --compress'
 
 # Command to put a file onto the remote file system
 def _remote_put_command(file_name):
@@ -40,7 +40,10 @@ def post_file(file_name):
 
 def fetch_file(file_name):
     return_code = os.system(_remote_fetch_command(file_name))
-    print(f'WARNING: failed to fetch file {file_name} with return code {return_code}')
+    if return_code != 0
+        print(f'WARNING: failed to fetch file {file_name} with return code {return_code}')
+    else:
+        print(f'Fetched file {file_name}')
 
 def wait_for_file(file_name, poll_freq = 2, initial_wait = 5, timeout = 20):
     '''
@@ -55,13 +58,15 @@ def wait_for_file(file_name, poll_freq = 2, initial_wait = 5, timeout = 20):
     if not file_name.endswith('jpg'):
         print(f'Warning: looking for {file_name} as a jpg instead')
     file_name = file_name[:-3] + 'jpg'
+    file_name = 'dreamt-' + file_name
 
     start = datetime.now()
     time.sleep(initial_wait)
     success = False
     while True:
         # Poll the remote
-        os.system(_remote_monitor_command())
+        response_code = os.system(_remote_monitor_command())
+        print(f'Polled ssh with response code {response_code}')
 
         # Look at the poll results
         with open(poll_results_loc, 'r') as f:
@@ -83,9 +88,11 @@ def wait_for_file(file_name, poll_freq = 2, initial_wait = 5, timeout = 20):
     if not success:
         return False, time_elapsed
     else:
-        fetch_file(file_name))
+        fetch_file(file_name)
         time_elapsed = (datetime.now() - start).seconds
         return True, time_elapsed
 
 if __name__ == '__main__':
-    wait_for_file('marco3 copy.jpg')
+    # print(_remote_monitor_command())
+    # response_code = os.system(_remote_monitor_command())
+    wait_for_file('marco3.jpg', initial_wait = 0)
