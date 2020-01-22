@@ -18,6 +18,9 @@ from tensorflow.keras.models import load_model
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
 
+model_path = './test-model.hdf5'
+dream_base_dir = '../dream-base-images/'
+dreamt_dir     = '../dreamt-images/'
 
 def load_dream_model():
     model = load_model(model_path,
