@@ -83,7 +83,7 @@ class Handler(FileSystemEventHandler):
                 print(f'''File doesn't appear to be a jpeg or png, ignoring''')
 
             print('Waiting for the file to finish transmission')
-            time.sleep(3)
+            time.sleep(5)
 
             try:
                 Timer.start()
@@ -92,7 +92,7 @@ class Handler(FileSystemEventHandler):
                 Timer.end()
             except:
                 print(f'Error loading the file; will wait and try again')
-                time.sleep(5)
+                time.sleep(10)
                 image, nat_size = load_lit_image(event.src_path, width, height)
                 Timer.end()
 
