@@ -50,6 +50,7 @@ session = SessionState.get(run_id=0,
 
 def main():
 
+    clearable_elements = []
     #######################################################################
     # (1) Decide app mode.
     #     Terrible UI but required by streamlit paradism
@@ -115,12 +116,12 @@ def main():
                 _ = st.button('Refresh image list')
             else:
                 if look_count == 0:
-                    welcome_screen()
+                    clearable_elements += welcome_screen()
                 look_count += 1
 
         # Pick the least recent new file in eager mode (for stability)
         elif session.mode == 'eager':
-            welcome_screen()
+            clearable_elements += welcome_screen()
             file_name = new_files[-1]
             break
 
@@ -132,7 +133,7 @@ def main():
                 display_files = new_files
 
             if look_count != max_looks:
-                welcome_screen()
+                clearable_elements += welcome_screen()
             file_name = st.selectbox('Pick a File (most recent on top)',
                 [null_file_name] + display_files,
             index = 0, key = session.run_id)
@@ -144,6 +145,8 @@ def main():
     #      image
     #######################################################################
     if file_name != null_file_name:
+        for elt in clearable_elements:
+            elt.empty()
         file_path        = dream_base_dir + file_name
         base_image       = lit_load_image(file_path)
         dream_done       = check_for_dream(file_name)
@@ -245,11 +248,10 @@ def dreamt_file_name(file_name):
 def check_for_dream(file_name):
     return os.path.exists(dreamt_dir+dreamt_file_name(file_name))
 
-# def load_dream_image(file_name):
-#     while True:
-#         available = get_dreamt_files()
-#         if file_name in list_of_files:
-#             return lit_load_image(dreamt_dir + file_name)
+@st.cache
+def load_dream_image(file_name):
+    file_name = dreamt_file_name(file_name)
+    return lit_load_image(dreamt_dir+file_name)
 
 ################################################################################
 #
@@ -291,22 +293,29 @@ def debugging_sidebar(save):
 ################################################################################
 
 def welcome_screen():
-    st.markdown("# Welcome to Art Dream")
-    st.markdown('## Get your own dream!')
-    st.markdown('''Take a photo on an iPhone and airdrop it to "Ravi's Macbook." ''' +
-        ('Then wait for your dream' if session.mode == 'eager'
-        else 'Then select the file at left'))
+    elts = []
+    elts.append(st.markdown(f'''
+    # Welcome to Art Dream"
+    ## Get your own dream!'
+    Take a photo on an iPhone and airdrop it to "Ravi's Macbook."
+    {'Then wait for your dream'
+     if session.mode == 'eager'
+     else 'Then select the file at left'}
 
-    st.markdown("- Airdrop is accessible in your phone's photo app, under sharing")
-    st.markdown("- You should have wifi and bluetooth turned on (no wifi connection necessary)")
-    st.markdown("- Must have an iPhone or iPad running iOS8.0+ or a Macbook not from the aughts or earlier with Lion (10.7)+")
-    # st.markdown("- Unfortunately, due to Apple's totalitarian ways, only iPhones1)
-    st.markdown('Note: this can take a hot second to process'
-                '  because your picture has to go to Oregon and back')
+    - Airdrop is accessible in your phone's photo app, under sharing
+    - You should have wifi and bluetooth turned on (no wifi connection necessary)
+    - Must have an iPhone or iPad running iOS8.0+ or a Macbook not from the aughts or earlier with Lion (10.7)+
+
+    Note: this can take a hot second to process because your picture has to go to Oregon and back')
+
+    {'Set the app to Eager Mode at top left to auto-detect' if session.mode == 'lazy' else ''}
+    '''))
     if session.mode == 'lazy':
-        st.markdown('Set the app to Eager Mode at top left to auto-detect')
-        _ = st.button('Refresh image list')
+        button = st.empty()
+        _ = button.button('Refresh image list')
+        elts.append(button)
 
+    return elts
 
 ################################################################################
 #
