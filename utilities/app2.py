@@ -17,18 +17,17 @@ from utilities import (
     dummy,
     dummy_input
 )
+from app_utilities import (
+    dream_base_dir,
+    dreamt_dir,
+    dream_file_type,
+    get_available_base_files,
+    dreamt_file_name,
+    check_for_dream,
+    get_dream_time,
+    get_dream_pairs
+)
 
-################################################################################
-#
-# Config
-#  Due to import issues, must match config in other files
-#
-################################################################################
-
-# Streamlit tends to run files from unknown locations so I have hardcoded these
-dream_base_dir  = '/Users/rcharan/Downloads/'
-dreamt_dir      = '/Users/rcharan/Dropbox/Flatiron/final-project/art-dream/dreamt-images/'
-dream_file_type = 'jpg'
 
 ################################################################################
 #
@@ -63,47 +62,10 @@ def lit_load_image(image_path):
     image = load_image(image_path, cast = tf.uint8)
     return image.numpy()
 
-def get_available_base_files(num_most_recent = None):
-    list_of_files = glob.glob(dream_base_dir + '*.jpg')
-    list_of_files+= glob.glob(dream_base_dir + '*.png')
-    list_of_files.sort(key = os.path.getctime, reverse = True)
-    if num_most_recent is not None:
-        list_of_files = list_of_files[:num_most_recent]
-
-    list_of_files = [file_path.split('/')[-1] for file_path in list_of_files]
-    return list_of_files
-
-def dreamt_file_name(file_name):
-    file_name = 'dreamt-' + file_name
-    # if file_name[-3:] != dream_file_type:
-        # print(f'Warning: looking for {file_name[:-3]}.{dream_file_type} instead')
-    file_name = '.'.join(file_name.split('.')[:-1])
-    file_name = file_name + '.' + dream_file_type
-    return file_name
-
-def check_for_dream(file_name):
-    return os.path.exists(dreamt_dir+dreamt_file_name(file_name))
-
 @st.cache
 def load_dream_image(file_name):
     file_name = dreamt_file_name(file_name)
     return lit_load_image(dreamt_dir+file_name)
-
-def get_dream_time(file_name_pair):
-    dream_path = dreamt_dir + file_name_pair[1]
-    return os.path.getctime(dream_path)
-
-def get_dream_pairs(max_pairs):
-    found_pairs = []
-    for file_name in get_available_base_files():
-        if check_for_dream(file_name):
-            found_pairs.append((file_name, dreamt_file_name(file_name)))
-            if len(found_pairs) == max_pairs:
-                break
-
-
-    found_pairs.sort(key = get_dream_time, reverse = True)
-    return found_pairs
 
 ################################################################################
 #
