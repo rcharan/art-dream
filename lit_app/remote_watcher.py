@@ -18,10 +18,6 @@ from tensorflow.keras.models import load_model
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
 
-dream_base_dir = '../dream-base-images/'
-dreamt_dir     = '../dreamt-images/'
-model_path     = './test-model.hdf5'
-
 
 def load_dream_model():
     model = load_model(model_path,
@@ -60,6 +56,10 @@ def load_lit_image(image_path, width, height, mode = 'vgg19'):
     image = tf.expand_dims(image, axis = 0)
     return image, nat_size
 
+def save_dream(image, file_name):
+    image = tf.image.encode_jpeg(image)
+    out_dir = dreamt_dir + 'dreamt-' + file_name[:-4] + '.jpg'
+    tf.io.write_file(out_dir, image)
 
 
 model, width, height = load_dream_model()
@@ -99,9 +99,7 @@ class Handler(FileSystemEventHandler):
             Timer.end()
 
             print(f'Saving the file')
-            image = tf.image.encode_jpeg(image)
-            out_dir = dreamt_dir + 'dreamt-' + file_name[:-4] + '.jpg'
-            tf.io.write_file(out_dir, image)
+            save_dream(image, file_name)
             Timer.end()
 
         elif event.event_type == 'modified':
