@@ -84,17 +84,29 @@ class Handler(FileSystemEventHandler):
 
             print('Waiting for the file to finish transmission')
             time.sleep(5)
+            timeout_count = 0
+            while timeout_count < 20
+                try:
+                    image, nat_size = load_lit_image(event.src_path, width, height))
+                except: tf.errors.InvalidArgumentError:
+                    timeout_count += 1
+                    print(f'File not finished loading after {timeout_count} tries')
+                    time.sleep(1)
+                else:
+                    print('Failed to load the image {event.src_path}; terminating')
+                    return
 
-            try:
-                Timer.start()
-                print(f'Loading the file')
-                image, nat_size = load_lit_image(event.src_path, width, height)
-                Timer.end()
-            except:
-                print(f'Error loading the file; will wait and try again')
-                time.sleep(10)
-                image, nat_size = load_lit_image(event.src_path, width, height)
-                Timer.end()
+
+            # try:
+            #     Timer.start()
+            #     print(f'Loading the file')
+            #     image, nat_size = load_lit_image(event.src_path, width, height)
+            #     Timer.end()
+            # except:
+            #     print(f'Error loading the file; will wait and try again')
+            #     time.sleep(10)
+            #     image, nat_size = load_lit_image(event.src_path, width, height)
+            #     Timer.end()
 
 
             print(f'Dreaming')
