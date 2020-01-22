@@ -1,6 +1,8 @@
 import os
 import time
 from datetime import datetime
+from watchdog.events import FileSystemEventHandler
+from file_watcher import Watcher
 
 # Remote directories
 remote_dreamt_dir      = '~/art-dream/dreamt-images/'
@@ -11,9 +13,23 @@ _local_dir             = '/Users/rcharan/Dropbox/Flatiron/final-project/art-drea
 local_dreamt_dir       = _local_dir + 'dreamt-images/'
 local_dream_base_dir   = _local_dir + 'dream-base-images/'
 
-local_ingest_dir       = _local_dir + 'dream-base-images/'
+local_ingest_dir       = '/Users/rcharan/Downloads/'
 
 poll_results_loc       = f'{_local_dir}lit_app/remote_dreams.txt'
+
+# Configuration
+dream_file_type       = 'jpg'
+
+# Utilities
+def parse_file_path(file_path):
+    parts     = file_path.split('/')
+    base_dir  = '/'.join(parts[:-1]) + '/'
+    file_name_parts = parts[-1].split('.')
+    file_name = '.'.join(file_name_parts[:-1])
+    file_ending = '.' + file_name_parts[-1].lower()
+    return base_dir, file_name, file_ending
+
+
 # Command to monitor the remote file system
 def _remote_monitor_command():
     ssh_command     = 'gcloud compute ssh jupyter@flatiron'
@@ -35,19 +51,29 @@ def _remote_put_command(file_path):
 
 
 # Functions to post and fetch files
-def post_file(file_path):
+def post_file(file_path, bare_name):
     return_code = os.system(_remote_put_command(file_path))
     if return_code != 0:
-        print(f'WARNING: failed to post file {file_name} with return code {return_code}')
+        print(f'{bare_name} -- WARNING: failed to post with return code {return_code}')
+        return False
+    else:
+        print(f'{bare_name} -- Posted')
+        return True
 
 def fetch_file(file_name):
     return_code = os.system(_remote_fetch_command(file_name))
-    if return_code != 0
+    if return_code != 0:
         print(f'WARNING: failed to fetch file {file_name} with return code {return_code}')
-    else:
-        print(f'Fetched file {file_name}')
 
-def wait_for_file(file_name, poll_freq = 2, initial_wait = 5, timeout = 20):
+def dreamt_file_name(file_name):
+    file_name = 'dreamt-' + file_name
+    # if file_name[-3:] != dream_file_type:
+        # print(f'Warning: looking for {file_name[:-3]}.{dream_file_type} instead')
+    file_name = '.'.join(file_name.split('.')[:-1])
+    file_name = file_name + '.' + dream_file_type
+    return file_name
+
+def wait_for_file(file_name, poll_freq = 2, initial_wait = 10, timeout = 60):
     '''
         Waits initial_wait, then starts polling every poll_freq (approx) to see
         if the file exists. If it exists, fetch the file for the local system.
@@ -57,10 +83,7 @@ def wait_for_file(file_name, poll_freq = 2, initial_wait = 5, timeout = 20):
                  (2) the time elapsed
     '''
 
-    if not file_name.endswith('jpg'):
-        print(f'Warning: looking for {file_name} as a jpg instead')
-    file_name = file_name[:-3] + 'jpg'
-    file_name = 'dreamt-' + file_name
+    file_name = dreamt_file_name(file_name)
 
     start = datetime.now()
     time.sleep(initial_wait)
@@ -68,7 +91,7 @@ def wait_for_file(file_name, poll_freq = 2, initial_wait = 5, timeout = 20):
     while True:
         # Poll the remote
         response_code = os.system(_remote_monitor_command())
-        print(f'Polled ssh with response code {response_code}')
+        # print(f'Polled ssh with response code {response_code}')
 
         # Look at the poll results
         with open(poll_results_loc, 'r') as f:
@@ -79,7 +102,8 @@ def wait_for_file(file_name, poll_freq = 2, initial_wait = 5, timeout = 20):
             success = True
             break
         else:
-            print(f'Files detected: {lines}')
+            # print(f'Files detected: {lines}')
+            pass
 
         time.sleep(poll_freq)
 
@@ -97,6 +121,9 @@ def wait_for_file(file_name, poll_freq = 2, initial_wait = 5, timeout = 20):
 
 class Handler(FileSystemEventHandler):
 
+    def __init__(self):
+        self.seen_files = []
+
     @staticmethod
     def on_any_event(event):
         if event.is_directory:
@@ -105,17 +132,31 @@ class Handler(FileSystemEventHandler):
         elif event.event_type == 'created':
             # Take any action here when a file is first created.
             file_name = event.src_path.split('/')[-1]
+            bare_name = '.'.join(file_name.split('.')[:-1])
+            file_type = file_name.split('.')[-1].lower()
 
-            print(event.src_path)
-            print(f'Detected file {file_name}')
-            if file_name[-3:] not in ['jpg', 'png']:
-                print(f'''File doesn't appear to be a jpeg or png, ignoring''')
-
-            print('Waiting for the file to finish loading locally')
+            print(f'{bare_name} -- Detected as {file_type.upper()}. Waiting for the file to finish loading locally')
             time.sleep(1)
+            if file_type in ['jpg', 'png']:
+                print(f'{bare_name} -- posting file')
+                success = post_file(event.src_path, bare_name)
+                if success:
+                    success, time_elapsed = wait_for_file(file_name, poll_freq = 2, initial_wait = 3, timeout = 20)
+                    if success:
+                        print(f'{bare_name} -- Fetched in {time_elapsed}s')
+                    else:
+                        print(f'{bare_name} -- WARNING: failed to fetch; took {time_elapsed}s')
+                print(f'\n-------------------------------------\n')
+            elif file_type in ['heic', 'heis']:
+                print(f'{bare_name} -- Converting HEIC to jpg')
+                safe_bare_name = bare_name.replace(' ', '_')
+                command = f'magick "{event.src_path}" "{local_ingest_dir}{safe_bare_name}.jpg"'
+                os.system(command)
 
-            post_file(event.src_path)
-            wait_for_file(file_name, poll_freq = 2, initial_wait = 3, timeout = 20)
+            else:
+                print(f'''File doesn't appear to be a jpeg, png, or HEIC, ignoring''')
+
+
 
         elif event.event_type == 'modified':
             # Taken any action here when a file is modified.
