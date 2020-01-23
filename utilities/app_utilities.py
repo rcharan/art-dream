@@ -105,9 +105,9 @@ def update_config(model_type, strong=True, artist_name='Pablo Picasso'):
     strong = 'true' if strong else 'false'
     config_str = ', '.join([model_type, strong, artist_name])
 
-    ssh_command     = 'gcloud compute ssh jupyter@flatiron:~/art-dream/lit_app/'
-    echo_command    = f''' --command 'echo "{config_str}"' '''
-    cat_command     = f' > dreamer_config.txt'
+    ssh_command     = 'gcloud compute ssh jupyter@flatiron'
+    echo_command    = f''' --command 'echo "{config_str}" '''
+    cat_command     = f" > ~/art-dream/lit_app/dreamer_config.txt'"
 
     command = ssh_command + echo_command + cat_command
     os.system(command)
