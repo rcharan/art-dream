@@ -43,6 +43,7 @@ def dream(model, image, nat_width, nat_height):
     img = get_image_from_model(model)
     img = tf.image.resize(img, [nat_width, nat_height], method = 'gaussian')
     img = tf.cast(img, tf.uint8)
+    return img
 
 def load_lit_image(image_path, width, height, mode = 'vgg19'):
     nat_image = load_image(image_path, cast = tf.uint8)
