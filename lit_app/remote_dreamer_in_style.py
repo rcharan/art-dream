@@ -164,7 +164,7 @@ def dream_style(model, image, style, nat_width, nat_height, strong = False):
     # Compile the model
     adam = tf.optimizers.Adam(learning_rate = 20.0)
     model.compile(optimizer = adam, loss = precomputed_loss)
-    model.fit(style, epochs = 7 if strong else 2)
+    model.fit(style, epochs = 7 if strong else 2, steps_per_epoch = 1)
 
     img = get_image_from_model(model)
     img = tf.image.resize(img, [nat_width, nat_height], method = 'gaussian')

@@ -58,7 +58,7 @@ def process_new_dreams():
             continue
 
         type, strength, artist = get_config()
-        print(f'{file_name} -- loaded, dreaming type {type} strength {strength}')
+        print(f'{file_name} -- loaded, dreaming type: {type}; strength {strength}; artist {artist}')
         if type == 'dream':
             image = dream(model, image, *nat_size)
         elif type == 'dream-style':
