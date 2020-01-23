@@ -7,6 +7,12 @@ from remote_dreamer import (
     load_dream_model
 )
 
+from remote_dreamer_in_style import (
+    load_dream_style_model,
+    load_style,
+    dream_style
+)
+
 import sys
 sys.path.append('../utilities/')
 from app_utilities import (
@@ -18,6 +24,20 @@ import time
 
 blacklist = []
 
+def get_config():
+    with open('dreamer_config.txt', 'r') as f:
+        line = f.readline()
+    line = line.strip()
+    line = line.split(',')
+    line = [l.strip() for l in line]
+    type, strength, artist = line
+    if artist == 'Wassily Kandinsky':
+        artist = ' ' + artist
+    if strength == 'true':
+        strength = True
+    elif strength == 'false':
+        strength = False
+    return type, strength, artist
 
 def process_new_dreams():
     new_dreams = get_undreamt_files(dream_base_dir, dreamt_dir)
@@ -37,8 +57,13 @@ def process_new_dreams():
             print(file_name, '--', e)
             continue
 
-        print(f'{file_name} -- loaded, dreaming')
-        image = dream(model, image, *nat_size)
+        type, strength, artist = get_config()
+        print(f'{file_name} -- loaded, dreaming type {type} strength {strength}')
+        if type == 'dream':
+            image = dream(model, image, *nat_size)
+        elif type == 'dream-style':
+            style = load_style(artist)
+            image = dream_style(style_model, image, style, *nat_size, strong = strength)
 
         print(f'{file_name} -- saving')
         save_dream(image, file_name)
@@ -47,6 +72,7 @@ def process_new_dreams():
         print(f'{file_name} -- {time_elapsed}s elapsed')
 
 model, width, height = load_dream_model()
+style_model          = load_dream_style_model()
 
 def main():
     print(f'\n-----------------------------------------\n'

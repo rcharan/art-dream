@@ -1,3 +1,5 @@
+from utilities import class_names
+
 import glob
 import os
 
@@ -94,3 +96,18 @@ def fetch_file(file_name):
         return False
     else:
         return True
+
+def update_config(model_type, strong=True, artist_name='Pablo Picasso'):
+    assert type(strong) == bool
+    assert model_type in ['dream', 'dream-style']
+    assert artist_name in class_names.tolist()
+
+    strong = 'true' if strong else 'false'
+    config_str = ', '.join([model_type, strong, artist_name])
+
+    ssh_command     = 'gcloud compute ssh jupyter@flatiron:~/art-dream/lit_app/'
+    echo_command    = f''' --command 'echo "{config_str}"' '''
+    cat_command     = f' > dreamer_config.txt'
+
+    command = ssh_command + echo_command + cat_command
+    os.system(command)
