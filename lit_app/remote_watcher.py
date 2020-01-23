@@ -73,6 +73,7 @@ def process_new_dreams():
 
 model, width, height = load_dream_model()
 style_model          = load_dream_style_model()
+# width = height = 896
 
 def main():
     print(f'\n-----------------------------------------\n'
