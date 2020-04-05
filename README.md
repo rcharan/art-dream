@@ -10,7 +10,9 @@ I also deployed this using a simple client/server architecture and a streamlit f
 
 This was my final project for the Flatiron School Data Science Immersive program in New York City.
 
-For results and more details, you can see the presentation [here](https://docs.google.com/presentation/d/1je4H8SJdYYj8dAzFf_Jfc3kqyNcvyp4vR5nLnIBfMqo/edit?usp=sharing) or the results of the demonstration on my [website](http://www.ravicharan.com/artdream).
+For results and more details, you can see the presentation [here](https://docs.google.com/presentation/d/1je4H8SJdYYj8dAzFf_Jfc3kqyNcvyp4vR5nLnIBfMqo/edit?usp=sharing) or the full results of the demonstration on my [website](http://www.ravicharan.com/artdream). Here is a sample:
+
+![Study in Marco](./lit_app/sample.png)
 
 # Technologies
 ## Models
